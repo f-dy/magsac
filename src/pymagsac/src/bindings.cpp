@@ -410,7 +410,8 @@ py::tuple findPlane3D(
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = points_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -436,6 +437,7 @@ py::tuple findPlane3D(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);
     }
 
+    applyMagsacSeed(seed);
     int num_inl = findPlane3D_(
         points,
         inliers,
@@ -476,7 +478,8 @@ py::tuple findPnP(
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -502,6 +505,7 @@ py::tuple findPnP(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);
     }
 
+    applyMagsacSeed(seed);
     int num_inl = findPnP_(
         correspondences, inliers, pose, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf,
@@ -528,7 +532,8 @@ py::tuple findPnP(
 py::tuple findPnPAC(
     py::array_t<double> correspondences_, py::array_t<double> probabilities_,
     int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -541,6 +546,7 @@ py::tuple findPnPAC(
     std::vector<bool> inliers(NUM_TENTS);
     std::vector<double> probabilities;
 
+    applyMagsacSeed(seed);
     int num_inl = findPnPAC_(correspondences, inliers, pose, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
 
@@ -558,7 +564,8 @@ py::tuple findPnPAC(
 py::tuple findPnPSIFT(
     py::array_t<double> correspondences_, py::array_t<double> probabilities_,
     int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -571,6 +578,7 @@ py::tuple findPnPSIFT(
     std::vector<bool> inliers(NUM_TENTS);
     std::vector<double> probabilities;
 
+    applyMagsacSeed(seed);
     int num_inl = findPnPSIFT_(correspondences, inliers, pose, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
 
@@ -594,7 +602,8 @@ py::tuple findRadialHomography(
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -620,6 +629,7 @@ py::tuple findRadialHomography(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);
     }
 
+    applyMagsacSeed(seed);
     int num_inl = findRadialHomography_(
         correspondences, inliers, H, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf,
@@ -649,7 +659,8 @@ py::tuple findHomographyAffine(
     py::array_t<double> correspondences_,
     py::array_t<double> probabilities_,
     int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -664,6 +675,7 @@ py::tuple findHomographyAffine(
     std::vector<bool> inliers(NUM_TENTS);
     std::vector<double> probabilities;
 
+    applyMagsacSeed(seed);
     int num_inl = findHomographyAffine_(correspondences, inliers, H, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
 
@@ -683,7 +695,8 @@ py::tuple findFundamentalMatrixAffine(
     py::array_t<double> correspondences_,
     py::array_t<double> probabilities_,
     int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -698,6 +711,7 @@ py::tuple findFundamentalMatrixAffine(
     std::vector<bool> inliers(NUM_TENTS);
     std::vector<double> probabilities;
 
+    applyMagsacSeed(seed);
     int num_inl = findFundamentalMatrixAffine_(correspondences, inliers, F, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
 
@@ -718,7 +732,8 @@ py::tuple findEssentialMatrixPlanar(
     py::array_t<double> K1_, py::array_t<double> K2_,
     py::array_t<double> probabilities_,
     int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -738,6 +753,7 @@ py::tuple findEssentialMatrixPlanar(
     std::vector<bool> inliers(NUM_TENTS);
     std::vector<double> probabilities;
 
+    applyMagsacSeed(seed);
     int num_inl = findEssentialMatrixPlanar_(correspondences, inliers, E, K1, K2, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
 
@@ -758,7 +774,8 @@ py::tuple findEssentialMatrixGravity(
     py::array_t<double> gravity_src_, py::array_t<double> gravity_dst_,
     py::array_t<double> probabilities_,
     int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    int seed)
 {
     py::buffer_info buf1 = correspondences_.request();
     size_t NUM_TENTS = buf1.shape[0];
@@ -784,6 +801,7 @@ py::tuple findEssentialMatrixGravity(
     std::vector<bool> inliers(NUM_TENTS);
     std::vector<double> probabilities;
 
+    applyMagsacSeed(seed);
     int num_inl = findEssentialMatrixGravity_(correspondences, inliers, E, K1, K2,
         gravity_src, gravity_dst, probabilities,
         sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
@@ -985,7 +1003,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findPnP", &findPnP, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -996,7 +1015,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findPnPAC", &findPnPAC, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1007,7 +1027,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findPnPSIFT", &findPnPSIFT, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1018,7 +1039,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findRadialHomography", &findRadialHomography, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1029,7 +1051,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findHomographyAffine", &findHomographyAffine, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1040,7 +1063,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findFundamentalMatrixAffine", &findFundamentalMatrixAffine, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1051,7 +1075,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findEssentialMatrixPlanar", &findEssentialMatrixPlanar, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1064,7 +1089,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
   m.def("findEssentialMatrixGravity", &findEssentialMatrixGravity, R"doc(some doc)doc",
         py::arg("correspondences"),
@@ -1079,7 +1105,8 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5); 
+        py::arg("partition_num") = 5,
+        py::arg("seed") = -1); 
 
 
   return m.ptr();
