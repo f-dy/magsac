@@ -17,6 +17,7 @@
 #include "samplers/importance_sampler.h"
 #include "samplers/adaptive_reordering_sampler.h"
 
+#include <memory>
 #include <thread>
 #include <algorithm>
 
@@ -56,13 +57,13 @@ int findRigidTransformation_(
     magsac::utils::DefaultRigidTransformationEstimator estimator; // The robust rigid transformation estimator class containing the
     gcransac::RigidTransformation model; // The estimated model
 
-    MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>* magsac;
+    std::unique_ptr<MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>> magsac;
     if (use_magsac_plus_plus)
-        magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>::MAGSAC_PLUS_PLUS);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>::MAGSAC_PLUS_PLUS));
     else
-        magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>::MAGSAC_ORIGINAL);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>::MAGSAC_ORIGINAL));
     magsac->setMaximumThreshold(sigma_max); // The maximum noise scale sigma allowed
     // The reference threshold counts the inliers that set the number of iterations, and
     // is the threshold of the validity check. Default: the inlier threshold, since these
@@ -196,13 +197,13 @@ int findFundamentalMatrix_(
     magsac::utils::DefaultFundamentalMatrixEstimator estimator(0.1); // The robust homography estimator class containing the
     gcransac::FundamentalMatrix model; // The estimated model
 
-    MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>* magsac;
+    std::unique_ptr<MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>> magsac;
     if (use_magsac_plus_plus)
-        magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>::MAGSAC_PLUS_PLUS);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>::MAGSAC_PLUS_PLUS));
     else
-        magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>::MAGSAC_ORIGINAL);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::DefaultFundamentalMatrixEstimator>::MAGSAC_ORIGINAL));
     magsac->setMaximumThreshold(sigma_max); // The maximum noise scale sigma allowed
     // The reference threshold counts the inliers that set the number of iterations, and
     // is the threshold of the validity check. Default: 1 px, MAGSAC's default, and never
@@ -524,13 +525,13 @@ int findLine2D_(std::vector<double>& pointsArr,
     magsac::utils::Default2DLineEstimator estimator; // The robust homography estimator class containing the function for the fitting and residual calculation
     gcransac::Homography model; // The estimated model
 
-    MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>* magsac;
+    std::unique_ptr<MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>> magsac;
     if (use_magsac_plus_plus)
-        magsac = new MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>::MAGSAC_PLUS_PLUS);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>::MAGSAC_PLUS_PLUS));
     else
-        magsac = new MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>::MAGSAC_ORIGINAL);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::Default2DLineEstimator>::MAGSAC_ORIGINAL));
 
     magsac->setMaximumThreshold(sigma_max); // The maximum noise scale sigma allowed
     // The reference threshold counts the inliers that set the number of iterations.
@@ -670,13 +671,13 @@ int findHomography_(std::vector<double>& correspondences,
     magsac::utils::DefaultHomographyEstimator estimator; // The robust homography estimator class containing the function for the fitting and residual calculation
     gcransac::Homography model; // The estimated model
 
-    MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>* magsac;
+    std::unique_ptr<MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>> magsac;
     if (use_magsac_plus_plus)
-        magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>::MAGSAC_PLUS_PLUS);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>::MAGSAC_PLUS_PLUS));
     else
-        magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>(
-            MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>::MAGSAC_ORIGINAL);
+        magsac.reset(new MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>(
+            MAGSAC<cv::Mat, magsac::utils::DefaultHomographyEstimator>::MAGSAC_ORIGINAL));
 
     magsac->setMaximumThreshold(sigma_max); // The maximum noise scale sigma allowed
     // The reference threshold counts the inliers that set the number of iterations.
