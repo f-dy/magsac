@@ -112,6 +112,21 @@ int findLine2D_(std::vector<double>& points,
     int partition_num,
     double reference_th); // <= 0: the default (see magsac_python.cpp)
 
+// Fits a plane (a, b, c, d), with ax + by + cz + d = 0 and a unit normal, to rows (x, y, z).
+// The other parameters are those of findLine2D_. Returns the number of inliers, or 0 if no
+// plane was found.
+int findPlane3D_(std::vector<double>& points,
+    std::vector<bool>& inliers,
+    std::vector<double>& plane,
+    std::vector<double>& inlier_probabilities,
+    int sampler_id,
+    bool use_magsac_plus_plus,
+    double sigma_max,
+    double conf,
+    int min_iters,
+    int max_iters,
+    int partition_num);
+
 int findFundamentalMatrix_(
     std::vector<double>& correspondences,
     std::vector<bool>& inliers,

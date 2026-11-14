@@ -720,5 +720,10 @@ namespace magsac
 		typedef estimator::Line2DEstimator<gcransac::estimator::solver::LinearModelSolver<2>, // The solver used for fitting a model to a minimal sample
 			gcransac::estimator::solver::LinearModelSolver<2>>  // The solver used for fitting a model to a non-minimal sample
 			Default2DLineEstimator;
+
+		// The default estimator for 3D plane fitting
+		typedef estimator::Wrapper<gcransac::estimator::LinearModelEstimator<gcransac::estimator::solver::LinearModelSolver<3>, // The solver used for fitting a model to a minimal sample
+			gcransac::estimator::solver::LinearModelSolver<3>, 3>, false> // The solver used for fitting a model to a non-minimal sample
+			Default3DPlaneEstimator;
 	}
 }
