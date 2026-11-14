@@ -433,12 +433,14 @@ py::tuple findLine2D(
 }
 
 py::tuple findPlane3D(DoubleArray points_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    std::optional<unsigned int> seed)
 {
     std::vector<double> points = readRows(points_, 3, 3, "points");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, points_.shape(0));
     std::vector<bool> inliers;
     std::vector<double> plane;
+    applyMagsacSeed(seed);
     const int num_inliers = findPlane3D_(points, inliers, plane, probabilities, sampler, use_magsac_plus_plus,
         sigma_th, conf, min_iters, max_iters, partition_num);
     return py::make_tuple(toArray(num_inliers, plane, { 4 }), toMask(inliers));
@@ -536,49 +538,57 @@ namespace
 }
 
 py::tuple findPnP(DoubleArray correspondences_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    std::optional<unsigned int> seed)
 {
     std::vector<double> correspondences = readRows(correspondences_, 5, 3, "correspondences");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
     std::vector<bool> inliers;
     std::vector<double> pose;
+    applyMagsacSeed(seed);
     const int num_inliers = findPnP_(correspondences, inliers, pose, probabilities, sampler, use_magsac_plus_plus,
         sigma_th, conf, min_iters, max_iters, partition_num);
     return py::make_tuple(toArray(num_inliers, pose, { 3, 4 }), toMask(inliers));
 }
 
 py::tuple findRadialHomography(DoubleArray correspondences_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    std::optional<unsigned int> seed)
 {
     std::vector<double> correspondences = readRows(correspondences_, 4, 5, "correspondences");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
     std::vector<bool> inliers;
     std::vector<double> H, distortion;
+    applyMagsacSeed(seed);
     const int num_inliers = findRadialHomography_(correspondences, inliers, H, distortion, probabilities, sampler,
         use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
     return py::make_tuple(toArray(num_inliers, H, { 3, 3 }), toArray(num_inliers, distortion, { 2 }), toMask(inliers));
 }
 
 py::tuple findHomographyAffine(DoubleArray correspondences_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
-    double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    std::optional<unsigned int> seed)
 {
     std::vector<double> correspondences = readRows(correspondences_, 8, 2, "correspondences");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
     std::vector<bool> inliers;
     std::vector<double> H;
+    applyMagsacSeed(seed);
     const int num_inliers = findHomographyAffine_(correspondences, inliers, H, probabilities, sampler,
         use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
     return py::make_tuple(toArray(num_inliers, H, { 3, 3 }), toMask(inliers));
 }
 
 py::tuple findEssentialMatrixPlanar(DoubleArray correspondences_, DoubleArray K1_, DoubleArray K2_, DoubleArray probabilities_,
-    int sampler, bool use_magsac_plus_plus, double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    int sampler, bool use_magsac_plus_plus, double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    std::optional<unsigned int> seed)
 {
     std::vector<double> correspondences = readRows(correspondences_, 4, 2, "correspondences");
     std::vector<double> K1 = readMatrix3(K1_, "K1"), K2 = readMatrix3(K2_, "K2");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
     std::vector<bool> inliers;
     std::vector<double> E;
+    applyMagsacSeed(seed);
     const int num_inliers = findEssentialMatrixPlanar_(correspondences, inliers, E, K1, K2, probabilities, sampler,
         use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
     return py::make_tuple(toArray(num_inliers, E, { 3, 3 }), toMask(inliers));
@@ -586,7 +596,8 @@ py::tuple findEssentialMatrixPlanar(DoubleArray correspondences_, DoubleArray K1
 
 py::tuple findEssentialMatrixGravity(DoubleArray correspondences_, DoubleArray K1_, DoubleArray K2_,
     DoubleArray gravity_src_, DoubleArray gravity_dst_, DoubleArray probabilities_,
-    int sampler, bool use_magsac_plus_plus, double sigma_th, double conf, int min_iters, int max_iters, int partition_num)
+    int sampler, bool use_magsac_plus_plus, double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
+    std::optional<unsigned int> seed)
 {
     std::vector<double> correspondences = readRows(correspondences_, 4, 3, "correspondences");
     std::vector<double> K1 = readMatrix3(K1_, "K1"), K2 = readMatrix3(K2_, "K2");
@@ -594,6 +605,7 @@ py::tuple findEssentialMatrixGravity(DoubleArray correspondences_, DoubleArray K
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
     std::vector<bool> inliers;
     std::vector<double> E;
+    applyMagsacSeed(seed);
     const int num_inliers = findEssentialMatrixGravity_(correspondences, inliers, E, K1, K2, gravity_src, gravity_dst,
         probabilities, sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
     return py::make_tuple(toArray(num_inliers, E, { 3, 3 }), toMask(inliers));
@@ -629,7 +641,8 @@ probabilities, one per row (for 4, at least one positive). The mask marks the ro
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5);
+        py::arg("partition_num") = 5,
+        py::arg("seed") = py::none());
 
   m.def("findRadialHomography", &findRadialHomography, R"doc(Fits a homography H and the radial distortion (lambda_1, lambda_2) of the division model
 in each image to correspondences [n,4]: (x1, y1, x2, y2), with coordinates relative to the distortion centres (for example,
@@ -647,7 +660,8 @@ probabilities, one per row (for 4, at least one positive). The mask marks the ro
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5);
+        py::arg("partition_num") = 5,
+        py::arg("seed") = py::none());
 
   m.def("findHomographyAffine", &findHomographyAffine, R"doc(Fits a homography to affine correspondences [n,8]: (x1, y1, x2, y2, a11, a12, a21, a22),
 where A = [[a11, a12], [a21, a22]] maps a neighbourhood of (x1, y1) to one of (x2, y2). Returns (H, mask).
@@ -663,7 +677,8 @@ probabilities, one per row (for 4, at least one positive). The mask marks the ro
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5);
+        py::arg("partition_num") = 5,
+        py::arg("seed") = py::none());
 
   m.def("findEssentialMatrixPlanar", &findEssentialMatrixPlanar, R"doc(Fits an essential matrix assuming a planar motion (rotation about the camera's y axis,
 translation in its xz plane) to correspondences [n,4] in pixels, given the intrinsics K1 and K2.
@@ -682,7 +697,8 @@ probabilities, one per row (for 4, at least one positive). The mask marks the ro
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5);
+        py::arg("partition_num") = 5,
+        py::arg("seed") = py::none());
 
   m.def("findEssentialMatrixGravity", &findEssentialMatrixGravity, R"doc(Fits an essential matrix to correspondences [n,4] in pixels, given the intrinsics K1 and K2
 and the rotations gravity_src and gravity_dst that align each camera's y axis with gravity (so the remaining rotation is about
@@ -703,7 +719,8 @@ probabilities, one per row (for 4, at least one positive). The mask marks the ro
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5);
+        py::arg("partition_num") = 5,
+        py::arg("seed") = py::none());
 
     m.def("adaptiveInlierSelection", &adaptiveInlierSelection, R"doc(some doc)doc",
         py::arg("x1y1"),
@@ -845,7 +862,8 @@ probabilities, one per row (for 4, at least one positive). The mask marks the ro
         py::arg("conf") = 0.99,
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
-        py::arg("partition_num") = 5);
+        py::arg("partition_num") = 5,
+        py::arg("seed") = py::none());
 
 
   return m.ptr();

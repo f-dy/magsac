@@ -74,7 +74,7 @@ pip3 install -e .
 
 # Reproducible results
 
-The Python estimators (`findHomography`, `findFundamentalMatrix`, `findEssentialMatrix`, `findRigidTransformation`, `findLine2D`) draw random samples. To get the same result every time, pass a seed, an integer from 0 to 2^32 - 1:
+The Python estimators (`findHomography`, `findFundamentalMatrix`, `findEssentialMatrix`, `findRigidTransformation`, `findLine2D`, `findPlane3D`, `findPnP`, `findRadialHomography`, `findHomographyAffine`, `findEssentialMatrixPlanar`, `findEssentialMatrixGravity`) draw random samples. To get the same result every time, pass a seed, an integer from 0 to 2^32 - 1:
 
 ```python
 H, mask = pymagsac.findHomography(correspondences, w1, h1, w2, h2, probabilities, seed=42)
