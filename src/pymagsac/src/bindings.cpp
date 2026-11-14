@@ -103,6 +103,7 @@ py::tuple findRigidTransformation(
     int min_iters,
     int max_iters,
     int partition_num,
+    std::optional<unsigned int> seed,
     std::optional<double> reference_th)
 {
 	py::buffer_info buf1 = correspondences_.request();
@@ -131,6 +132,7 @@ py::tuple findRigidTransformation(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);        
     }
 
+    applyMagsacSeed(seed);
     int num_inl = findRigidTransformation_(
         correspondences,
         inliers,
@@ -175,6 +177,7 @@ py::tuple findFundamentalMatrix(
     int min_iters,
     int max_iters,
     int partition_num,
+    std::optional<unsigned int> seed,
     std::optional<double> reference_th)
 {
 	py::buffer_info buf1 = correspondences_.request();
@@ -203,6 +206,7 @@ py::tuple findFundamentalMatrix(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);        
     }
 
+    applyMagsacSeed(seed);
     int num_inl = findFundamentalMatrix_(
         correspondences,
         inliers,
@@ -253,6 +257,7 @@ py::tuple findEssentialMatrix(
     int min_iters,
     int max_iters,
     int partition_num,
+    std::optional<unsigned int> seed,
     std::optional<double> reference_th)
 {
 	py::buffer_info buf1 = correspondences_.request();
@@ -303,6 +308,7 @@ py::tuple findEssentialMatrix(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);        
     }
 
+    applyMagsacSeed(seed);
     int num_inl = findEssentialMatrix_(
         correspondences,
         inliers,
@@ -353,6 +359,7 @@ py::tuple findLine2D(
     int min_iters,
     int max_iters,
     int partition_num,
+    std::optional<unsigned int> seed,
     std::optional<double> reference_th)
 {
     py::buffer_info buf1 = points_.request();
@@ -379,6 +386,7 @@ py::tuple findLine2D(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);        
     }
     
+    applyMagsacSeed(seed);
     int num_inl = findLine2D_(
         points,
         inliers,
@@ -427,6 +435,7 @@ py::tuple findHomography(
     int min_iters,
     int max_iters,
     int partition_num,
+    std::optional<unsigned int> seed,
     std::optional<double> reference_th)
 {
 	py::buffer_info buf1 = correspondences_.request();
@@ -455,6 +464,7 @@ py::tuple findHomography(
         probabilities.assign(ptr_prob, ptr_prob + buf_prob.size);        
     }
     
+    applyMagsacSeed(seed);
     int num_inl = findHomography_(
                     correspondences,
                     inliers,
@@ -703,6 +713,7 @@ min(sigma_th, 1), which assumes pixels: in other units, pass 1 px in those units
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
+        py::arg("seed") = py::none(),
         py::arg("reference_th") = py::none());
 
     m.def("findFundamentalMatrix", &findFundamentalMatrix, R"doc(Estimates a fundamental matrix with MAGSAC or MAGSAC++.
@@ -727,6 +738,7 @@ min(sigma_th, 1), which assumes pixels: in other units, pass 1 px in those units
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
+        py::arg("seed") = py::none(),
         py::arg("reference_th") = py::none());
 
     m.def("findRigidTransformation", &findRigidTransformation, R"doc(Estimates a rigid transformation with MAGSAC or MAGSAC++.
@@ -746,6 +758,7 @@ iterations; also the threshold of the check of the models. None (default): sigma
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
+        py::arg("seed") = py::none(),
         py::arg("reference_th") = py::none());
 
   m.def("findHomography", &findHomography, R"doc(Estimates a homography with MAGSAC or MAGSAC++.
@@ -770,6 +783,7 @@ in those units.)doc",
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
+        py::arg("seed") = py::none(),
         py::arg("reference_th") = py::none()); 
 
   m.def("findLine2D", &findLine2D, R"doc(Estimates a 2D line with MAGSAC or MAGSAC++.
@@ -792,6 +806,7 @@ in those units.)doc",
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
+        py::arg("seed") = py::none(),
         py::arg("reference_th") = py::none()); 
 
 
