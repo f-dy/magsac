@@ -32,7 +32,8 @@ int findPnP_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num);
+    int partition_num,
+    double reference_th); // <= 0: the default (see magsac_python.cpp)
 
 // Fits a homography H and the radial distortion (lambda_1, lambda_2) of the division model
 // of each image to rows (x1, y1, x2, y2), with coordinates relative to the distortion centres.
@@ -47,7 +48,8 @@ int findRadialHomography_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num);
+    int partition_num,
+    double reference_th); // <= 0: the default (see magsac_python.cpp)
 
 // Fits a homography to affine correspondences, rows (x1, y1, x2, y2, a11, a12, a21, a22),
 // where A = [a11 a12; a21 a22] maps a neighbourhood of (x1, y1) to one of (x2, y2).
@@ -61,7 +63,8 @@ int findHomographyAffine_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num);
+    int partition_num,
+    double reference_th); // <= 0: the default (see magsac_python.cpp)
 
 // Fits an essential matrix to rows (x1, y1, x2, y2) in pixels, assuming a planar motion
 // (rotation about the vertical axis, translation in the horizontal plane).
@@ -77,7 +80,8 @@ int findPlanarEssentialMatrix_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num);
+    int partition_num,
+    double reference_th); // <= 0: the default (see magsac_python.cpp)
 
 // Fits an essential matrix to rows (x1, y1, x2, y2) in pixels, given the rotations that
 // align each camera's vertical axis with gravity.
@@ -95,7 +99,8 @@ int findGravityEssentialMatrix_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num);
+    int partition_num,
+    double reference_th); // <= 0: the default (see magsac_python.cpp)
 
 int findLine2D_(std::vector<double>& points,
     std::vector<bool>& inliers,
@@ -125,7 +130,8 @@ int findPlane3D_(std::vector<double>& points,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num);
+    int partition_num,
+    double reference_th); // <= 0: the default (see magsac_python.cpp)
 
 int findFundamentalMatrix_(
     std::vector<double>& correspondences,

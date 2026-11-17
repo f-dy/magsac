@@ -446,7 +446,7 @@ py::tuple findLine2D(
 
 py::tuple findPlane3D(DoubleArray points_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
     double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
-    std::optional<unsigned int> seed)
+    std::optional<unsigned int> seed, std::optional<double> reference_th)
 {
     std::vector<double> points = readRows(points_, 3, 3, "points");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, points_.shape(0));
@@ -454,7 +454,7 @@ py::tuple findPlane3D(DoubleArray points_, DoubleArray probabilities_, int sampl
     std::vector<double> plane;
     applyMagsacSeed(seed);
     const int num_inliers = findPlane3D_(points, inliers, plane, probabilities, sampler, use_magsac_plus_plus,
-        sigma_th, conf, min_iters, max_iters, partition_num);
+        sigma_th, conf, min_iters, max_iters, partition_num, referenceThreshold(reference_th));
     return py::make_tuple(toArray(num_inliers, plane, { 4 }), toMask(inliers));
 }
 
@@ -551,7 +551,7 @@ namespace
 
 py::tuple findPnP(DoubleArray correspondences_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
     double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
-    std::optional<unsigned int> seed)
+    std::optional<unsigned int> seed, std::optional<double> reference_th)
 {
     std::vector<double> correspondences = readRows(correspondences_, 5, 3, "correspondences");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
@@ -559,13 +559,13 @@ py::tuple findPnP(DoubleArray correspondences_, DoubleArray probabilities_, int 
     std::vector<double> pose;
     applyMagsacSeed(seed);
     const int num_inliers = findPnP_(correspondences, inliers, pose, probabilities, sampler, use_magsac_plus_plus,
-        sigma_th, conf, min_iters, max_iters, partition_num);
+        sigma_th, conf, min_iters, max_iters, partition_num, referenceThreshold(reference_th));
     return py::make_tuple(toArray(num_inliers, pose, { 3, 4 }), toMask(inliers));
 }
 
 py::tuple findRadialHomography(DoubleArray correspondences_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
     double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
-    std::optional<unsigned int> seed)
+    std::optional<unsigned int> seed, std::optional<double> reference_th)
 {
     std::vector<double> correspondences = readRows(correspondences_, 4, 5, "correspondences");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
@@ -573,13 +573,13 @@ py::tuple findRadialHomography(DoubleArray correspondences_, DoubleArray probabi
     std::vector<double> H, distortion;
     applyMagsacSeed(seed);
     const int num_inliers = findRadialHomography_(correspondences, inliers, H, distortion, probabilities, sampler,
-        use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
+        use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num, referenceThreshold(reference_th));
     return py::make_tuple(toArray(num_inliers, H, { 3, 3 }), toArray(num_inliers, distortion, { 2 }), toMask(inliers));
 }
 
 py::tuple findHomographyAffine(DoubleArray correspondences_, DoubleArray probabilities_, int sampler, bool use_magsac_plus_plus,
     double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
-    std::optional<unsigned int> seed)
+    std::optional<unsigned int> seed, std::optional<double> reference_th)
 {
     std::vector<double> correspondences = readRows(correspondences_, 8, 2, "correspondences");
     std::vector<double> probabilities = readProbabilities(sampler, probabilities_, correspondences_.shape(0));
@@ -587,13 +587,13 @@ py::tuple findHomographyAffine(DoubleArray correspondences_, DoubleArray probabi
     std::vector<double> H;
     applyMagsacSeed(seed);
     const int num_inliers = findHomographyAffine_(correspondences, inliers, H, probabilities, sampler,
-        use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
+        use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num, referenceThreshold(reference_th));
     return py::make_tuple(toArray(num_inliers, H, { 3, 3 }), toMask(inliers));
 }
 
 py::tuple findPlanarEssentialMatrix(DoubleArray correspondences_, DoubleArray K1_, DoubleArray K2_, DoubleArray probabilities_,
     int sampler, bool use_magsac_plus_plus, double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
-    std::optional<unsigned int> seed)
+    std::optional<unsigned int> seed, std::optional<double> reference_th)
 {
     std::vector<double> correspondences = readRows(correspondences_, 4, 2, "correspondences");
     std::vector<double> K1 = readMatrix3(K1_, "K1"), K2 = readMatrix3(K2_, "K2");
@@ -602,14 +602,14 @@ py::tuple findPlanarEssentialMatrix(DoubleArray correspondences_, DoubleArray K1
     std::vector<double> E;
     applyMagsacSeed(seed);
     const int num_inliers = findPlanarEssentialMatrix_(correspondences, inliers, E, K1, K2, probabilities, sampler,
-        use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
+        use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num, referenceThreshold(reference_th));
     return py::make_tuple(toArray(num_inliers, E, { 3, 3 }), toMask(inliers));
 }
 
 py::tuple findGravityEssentialMatrix(DoubleArray correspondences_, DoubleArray source_gravity_,
     DoubleArray destination_gravity_, DoubleArray K1_, DoubleArray K2_, DoubleArray probabilities_,
     int sampler, bool use_magsac_plus_plus, double sigma_th, double conf, int min_iters, int max_iters, int partition_num,
-    std::optional<unsigned int> seed)
+    std::optional<unsigned int> seed, std::optional<double> reference_th)
 {
     std::vector<double> correspondences = readRows(correspondences_, 4, 3, "correspondences");
     std::vector<double> source_gravity = readMatrix3(source_gravity_, "source_gravity");
@@ -620,7 +620,7 @@ py::tuple findGravityEssentialMatrix(DoubleArray correspondences_, DoubleArray s
     std::vector<double> E;
     applyMagsacSeed(seed);
     const int num_inliers = findGravityEssentialMatrix_(correspondences, inliers, E, source_gravity, destination_gravity, K1, K2,
-        probabilities, sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num);
+        probabilities, sampler, use_magsac_plus_plus, sigma_th, conf, min_iters, max_iters, partition_num, referenceThreshold(reference_th));
     return py::make_tuple(toArray(num_inliers, E, { 3, 3 }), toMask(inliers));
 }
 
@@ -651,7 +651,9 @@ The residual is the reprojection error in normalized coordinates, and sigma_th i
 t pixels is t / f for a focal length of f pixels (the default, 0.001, is 1 px at f = 1000 px).
 Samplers: 0 (uniform), 1 (PROSAC, rows sorted by decreasing quality), 3 (NG-RANSAC) and 4 (AR-Sampler); 3 and 4 need
 probabilities, one per row, finite and non-negative, at least one positive. Sampler 2 (P-NAPSAC) needs the image sizes,
-which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.)doc",
+which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.
+reference_th: a threshold, in sigma_th's units, for the inliers counted to skip the models that can't beat the best one
+and, for MAGSAC++, to set the number of iterations. None (default): sigma_th.)doc",
         py::arg("correspondences"),
         py::arg("probabilities"),
         py::arg("sampler") = 0,
@@ -661,7 +663,8 @@ which this function doesn't take. The mask marks the rows whose residual is at m
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
-        py::arg("seed") = py::none());
+        py::arg("seed") = py::none(),
+        py::arg("reference_th") = py::none());
 
   m.def("findRadialHomography", &findRadialHomography, R"doc(Fits a homography H and the radial distortion (lambda_1, lambda_2) of the division model
 in each image to correspondences [n,4]: (x1, y1, x2, y2), with coordinates relative to the distortion centres (for example,
@@ -671,7 +674,9 @@ points, in the units of the coordinates, as sigma_th: with coordinates divided b
 is t / s (the default, 0.001, is 1 px for s = 1000 px).
 Samplers: 0 (uniform), 1 (PROSAC, rows sorted by decreasing quality), 3 (NG-RANSAC) and 4 (AR-Sampler); 3 and 4 need
 probabilities, one per row, finite and non-negative, at least one positive. Sampler 2 (P-NAPSAC) needs the image sizes,
-which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.)doc",
+which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.
+reference_th: a threshold, in sigma_th's units, for the inliers counted to skip the models that can't beat the best one
+and, for MAGSAC++, to set the number of iterations. None (default): sigma_th.)doc",
         py::arg("correspondences"),
         py::arg("probabilities"),
         py::arg("sampler") = 0,
@@ -681,7 +686,8 @@ which this function doesn't take. The mask marks the rows whose residual is at m
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
-        py::arg("seed") = py::none());
+        py::arg("seed") = py::none(),
+        py::arg("reference_th") = py::none());
 
   m.def("findHomographyAffine", &findHomographyAffine, R"doc(Fits a homography to affine correspondences [n,8]: (x1, y1, x2, y2, a11, a12, a21, a22),
 where A = [[a11, a12], [a21, a22]] maps a neighbourhood of (x1, y1) to one of (x2, y2). Returns (H, mask).
@@ -689,7 +695,9 @@ Only the minimal solver (two affine correspondences) uses A: the residual is the
 as sigma_th, and the final model is fitted to the inliers' points (four-point solver).
 Samplers: 0 (uniform), 1 (PROSAC, rows sorted by decreasing quality), 3 (NG-RANSAC) and 4 (AR-Sampler); 3 and 4 need
 probabilities, one per row, finite and non-negative, at least one positive. Sampler 2 (P-NAPSAC) needs the image sizes,
-which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.)doc",
+which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.
+reference_th: a threshold, in pixels, for the inliers counted to skip the models that can't beat the best one
+and, for MAGSAC++, to set the number of iterations. None (default): min(sigma_th, 1 px).)doc",
         py::arg("correspondences"),
         py::arg("probabilities"),
         py::arg("sampler") = 0,
@@ -699,7 +707,8 @@ which this function doesn't take. The mask marks the rows whose residual is at m
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
-        py::arg("seed") = py::none());
+        py::arg("seed") = py::none(),
+        py::arg("reference_th") = py::none());
 
   m.def("findPlanarEssentialMatrix", &findPlanarEssentialMatrix, R"doc(Fits an essential matrix assuming a planar motion (rotation about the camera's y axis,
 translation in its xz plane) to correspondences [n,4] in pixels, given the intrinsics K1 and K2.
@@ -708,7 +717,9 @@ matrix fitted to the inliers (five-point solver, then bundle adjustment), so it 
 The residual is the Sampson distance, in pixels (converted by the mean focal length), as sigma_th.
 Samplers: 0 (uniform), 1 (PROSAC, rows sorted by decreasing quality), 3 (NG-RANSAC) and 4 (AR-Sampler); 3 and 4 need
 probabilities, one per row, finite and non-negative, at least one positive. Sampler 2 (P-NAPSAC) needs the image sizes,
-which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.)doc",
+which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.
+reference_th: a threshold, in pixels, for the inliers counted to skip the models that can't beat the best one
+and, for MAGSAC++, to set the number of iterations. None (default): min(sigma_th, 1 px).)doc",
         py::arg("correspondences"),
         py::arg("K1"),
         py::arg("K2"),
@@ -720,7 +731,8 @@ which this function doesn't take. The mask marks the rows whose residual is at m
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
-        py::arg("seed") = py::none());
+        py::arg("seed") = py::none(),
+        py::arg("reference_th") = py::none());
 
   m.def("findGravityEssentialMatrix", &findGravityEssentialMatrix, R"doc(Fits an essential matrix to correspondences [n,4] in pixels, given the rotations
 source_gravity and destination_gravity that align each camera's y axis with gravity (so the remaining rotation is about
@@ -729,7 +741,9 @@ is a general essential matrix fitted to the inliers (five-point solver, then bun
 constraint only approximately. The residual is the Sampson distance, in pixels (converted by the mean focal length), as sigma_th.
 Samplers: 0 (uniform), 1 (PROSAC, rows sorted by decreasing quality), 3 (NG-RANSAC) and 4 (AR-Sampler); 3 and 4 need
 probabilities, one per row, finite and non-negative, at least one positive. Sampler 2 (P-NAPSAC) needs the image sizes,
-which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.)doc",
+which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.
+reference_th: a threshold, in pixels, for the inliers counted to skip the models that can't beat the best one
+and, for MAGSAC++, to set the number of iterations. None (default): min(sigma_th, 1 px).)doc",
         py::arg("correspondences"),
         py::arg("source_gravity"),
         py::arg("destination_gravity"),
@@ -743,7 +757,8 @@ which this function doesn't take. The mask marks the rows whose residual is at m
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
-        py::arg("seed") = py::none());
+        py::arg("seed") = py::none(),
+        py::arg("reference_th") = py::none());
 
     m.def("adaptiveInlierSelection", &adaptiveInlierSelection, R"doc(some doc)doc",
         py::arg("x1y1"),
@@ -877,7 +892,9 @@ in those units.)doc",
 Returns (plane, mask). The residual is the distance of a point to the plane, in the points' units, as sigma_th.
 Samplers: 0 (uniform), 1 (PROSAC, rows sorted by decreasing quality), 3 (NG-RANSAC) and 4 (AR-Sampler); 3 and 4 need
 probabilities, one per row, finite and non-negative, at least one positive. Sampler 2 (P-NAPSAC) needs the image sizes,
-which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.)doc",
+which this function doesn't take. The mask marks the rows whose residual is at most sigma_th.
+reference_th: a threshold, in sigma_th's units, for the inliers counted to skip the models that can't beat the best one
+and, for MAGSAC++, to set the number of iterations. None (default): sigma_th.)doc",
         py::arg("points"),
         py::arg("probabilities"),
         py::arg("sampler") = 0,
@@ -887,7 +904,8 @@ which this function doesn't take. The mask marks the rows whose residual is at m
         py::arg("min_iters") = 50,
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5,
-        py::arg("seed") = py::none());
+        py::arg("seed") = py::none(),
+        py::arg("reference_th") = py::none());
 
 
   return m.ptr();

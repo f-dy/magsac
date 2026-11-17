@@ -661,13 +661,15 @@ int findPlane3D_(std::vector<double>& pointsArr,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    double reference_th)
 {
     cv::Mat points(pointsArr.size() / 3, 3, CV_64F, &pointsArr[0]);
     magsac::utils::Default3DPlaneEstimator estimator;
     gcransac::Model model;
+    // The reference threshold. Default: the inlier threshold, since these data have no pixel unit.
     const int num_inliers = runMagsac(points, estimator, inlier_probabilities, sampler_id, use_magsac_plus_plus,
-        sigma_max, 1.0, conf, min_iters, max_iters, partition_num, model, inliers);
+        sigma_max, reference_th > 0 ? reference_th : sigma_max, conf, min_iters, max_iters, partition_num, model, inliers);
     if (num_inliers > 0)
         plane = toRowMajor(model.descriptor);
     return num_inliers;
@@ -931,7 +933,8 @@ namespace
         double conf,
         int min_iters,
         int max_iters,
-        int partition_num)
+        int partition_num,
+    double reference_th)
     {
         const int num_tents = correspondences.size() / 4;
         cv::Mat points(num_tents, 4, CV_64F, &correspondences[0]);
@@ -942,9 +945,13 @@ namespace
         const double threshold_normalizer = (intrinsics_src(0, 0) + intrinsics_src(1, 1) +
             intrinsics_dst(0, 0) + intrinsics_dst(1, 1)) / 4.0;
 
+        // The reference threshold: 1 px (MAGSAC's default) by default, never above the inlier
+        // threshold, normalized like it.
+        const double reference_px = reference_th > 0 ? reference_th : std::min(sigma_max, 1.0);
+
         gcransac::Model model;
         const int num_inliers = runMagsac(normalized_points, estimator, inlier_probabilities, sampler_id,
-            use_magsac_plus_plus, sigma_max / threshold_normalizer, 1.0 / threshold_normalizer,
+            use_magsac_plus_plus, sigma_max / threshold_normalizer, reference_px / threshold_normalizer,
             conf, min_iters, max_iters, partition_num, model, inliers);
         if (num_inliers > 0)
             E = toRowMajor(model.descriptor);
@@ -962,13 +969,15 @@ int findPnP_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    double reference_th)
 {
     cv::Mat points(correspondences.size() / 5, 5, CV_64F, &correspondences[0]);
     magsac::utils::DefaultPnPEstimator estimator;
     gcransac::Model model;
+    // The reference threshold. Default: the inlier threshold, since normalized coordinates have no pixel unit.
     const int num_inliers = runMagsac(points, estimator, inlier_probabilities, sampler_id, use_magsac_plus_plus,
-        sigma_max, 1.0, conf, min_iters, max_iters, partition_num, model, inliers);
+        sigma_max, reference_th > 0 ? reference_th : sigma_max, conf, min_iters, max_iters, partition_num, model, inliers);
     if (num_inliers > 0)
         pose = toRowMajor(model.descriptor);
     return num_inliers;
@@ -985,13 +994,15 @@ int findRadialHomography_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    double reference_th)
 {
     cv::Mat points(correspondences.size() / 4, 4, CV_64F, &correspondences[0]);
     magsac::utils::DefaultRadialHomographyEstimator estimator;
     gcransac::Model model;
+    // The reference threshold. Default: the inlier threshold, since these coordinates have no pixel unit.
     const int num_inliers = runMagsac(points, estimator, inlier_probabilities, sampler_id, use_magsac_plus_plus,
-        sigma_max, 1.0, conf, min_iters, max_iters, partition_num, model, inliers);
+        sigma_max, reference_th > 0 ? reference_th : sigma_max, conf, min_iters, max_iters, partition_num, model, inliers);
     if (num_inliers > 0)
     {
         // The model is [H, (lambda_1, lambda_2, 0)^T, H^-1].
@@ -1011,13 +1022,15 @@ int findHomographyAffine_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    double reference_th)
 {
     cv::Mat points(correspondences.size() / 8, 8, CV_64F, &correspondences[0]);
     magsac::utils::DefaultHomographyAffineEstimator estimator;
     gcransac::Model model;
+    // The reference threshold. Default: 1 px, MAGSAC's default, and never above the inlier threshold.
     const int num_inliers = runMagsac(points, estimator, inlier_probabilities, sampler_id, use_magsac_plus_plus,
-        sigma_max, 1.0, conf, min_iters, max_iters, partition_num, model, inliers);
+        sigma_max, reference_th > 0 ? reference_th : std::min(sigma_max, 1.0), conf, min_iters, max_iters, partition_num, model, inliers);
     if (num_inliers > 0)
         H = toRowMajor(model.descriptor);
     return num_inliers;
@@ -1035,13 +1048,15 @@ int findPlanarEssentialMatrix_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    double reference_th)
 {
     const Eigen::Matrix3d intrinsics_src = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&src_K[0]);
     const Eigen::Matrix3d intrinsics_dst = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&dst_K[0]);
     magsac::utils::DefaultPlanarEssentialMatrixEstimator estimator(intrinsics_src, intrinsics_dst);
     return runMagsacEssential(correspondences, estimator, intrinsics_src, intrinsics_dst, inliers, E,
-        inlier_probabilities, sampler_id, use_magsac_plus_plus, sigma_max, conf, min_iters, max_iters, partition_num);
+        inlier_probabilities, sampler_id, use_magsac_plus_plus, sigma_max, conf, min_iters, max_iters, partition_num,
+        reference_th);
 }
 
 int findGravityEssentialMatrix_(std::vector<double>& correspondences,
@@ -1058,7 +1073,8 @@ int findGravityEssentialMatrix_(std::vector<double>& correspondences,
     double conf,
     int min_iters,
     int max_iters,
-    int partition_num)
+    int partition_num,
+    double reference_th)
 {
     const Eigen::Matrix3d intrinsics_src = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&src_K[0]);
     const Eigen::Matrix3d intrinsics_dst = Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&dst_K[0]);
@@ -1067,5 +1083,6 @@ int findGravityEssentialMatrix_(std::vector<double>& correspondences,
         Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&source_gravity[0]),
         Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>>(&destination_gravity[0]));
     return runMagsacEssential(correspondences, estimator, intrinsics_src, intrinsics_dst, inliers, E,
-        inlier_probabilities, sampler_id, use_magsac_plus_plus, sigma_max, conf, min_iters, max_iters, partition_num);
+        inlier_probabilities, sampler_id, use_magsac_plus_plus, sigma_max, conf, min_iters, max_iters, partition_num,
+        reference_th);
 }

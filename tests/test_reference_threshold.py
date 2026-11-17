@@ -75,3 +75,43 @@ def test_default_of_pixel_functions_is_min_of_sigma_th_and_1_px():
         H0, m0 = pymagsac.findHomography(*args, **kw)
         H1, m1 = pymagsac.findHomography(*args, reference_th=min(sigma_th, 1.0), **kw)
         assert np.array_equal(H0, H1) and np.array_equal(m0, m1)
+
+
+def plane_points(scale):
+    rng = np.random.default_rng(1)
+    inliers = np.c_[rng.uniform(-10, 10, (300, 2)), rng.normal(0, 0.01, 300)]
+    points = np.r_[inliers, rng.uniform(-15, 15, (100, 3))]
+    return np.ascontiguousarray(points * scale)
+
+
+@pytest.mark.parametrize("scale", [1.0, 1000.0])
+def test_default_of_plane_is_sigma_th(scale):
+    # findPlane3D's data have no pixel unit: the default is sigma_th, so points in
+    # millimetres give the same plane as in metres.
+    kw = dict(sigma_th=0.05 * scale, min_iters=50, max_iters=1000, seed=3)
+    plane0, mask0 = pymagsac.findPlane3D(plane_points(scale), [], **kw)
+    plane1, mask1 = pymagsac.findPlane3D(plane_points(scale), [], reference_th=0.05 * scale, **kw)
+    assert np.array_equal(plane0, plane1) and np.array_equal(mask0, mask1)
+    assert abs(abs(plane0[2]) - 1) < 1e-4 and mask0[:300].sum() >= 290
+
+
+K = np.array([[1000.0, 0, 320], [0, 1000, 240], [0, 0, 1]])
+NEW_FUNCTIONS = {
+    "findPlane3D": lambda r: pymagsac.findPlane3D(plane_points(1.0), [], reference_th=r),
+    "findPnP": lambda r: pymagsac.findPnP(np.random.rand(20, 5), [], reference_th=r),
+    "findRadialHomography": lambda r: pymagsac.findRadialHomography(np.random.rand(20, 4), [], reference_th=r),
+    "findHomographyAffine": lambda r: pymagsac.findHomographyAffine(np.random.rand(20, 8), [], reference_th=r),
+    "findPlanarEssentialMatrix": lambda r: pymagsac.findPlanarEssentialMatrix(
+        np.random.rand(20, 4), K, K, [], reference_th=r),
+    "findGravityEssentialMatrix": lambda r: pymagsac.findGravityEssentialMatrix(
+        np.random.rand(20, 4), np.eye(3), np.eye(3), K, K, [], reference_th=r),
+}
+
+
+@pytest.mark.parametrize("name", NEW_FUNCTIONS)
+def test_reference_threshold_of_the_other_functions(name):
+    NEW_FUNCTIONS[name](None)
+    NEW_FUNCTIONS[name](0.5)
+    for value in [0.0, -1.0, float("nan")]:
+        with pytest.raises(ValueError):
+            NEW_FUNCTIONS[name](value)
