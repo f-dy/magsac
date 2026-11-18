@@ -151,14 +151,14 @@ install(TARGETS pymagsac DESTINATION .)
 # Test of MAGSAC++'s IRLS weights, not built by default:
 #   cmake --build <build> --target test_irls_weights && <build>/test_irls_weights
 add_executable(test_irls_weights EXCLUDE_FROM_ALL tests/cpp/test_irls_weights.cpp)
-target_link_libraries(test_irls_weights ${PROJECT_NAME} GraphCutRANSAC ${OpenCV_LIBS} Eigen3::Eigen gflags ${TRGT_LNK_LBS_ADDITIONAL})
+target_link_libraries(test_irls_weights ${PROJECT_NAME} GraphCutRANSAC ${OpenCV_LIBS} Eigen3::Eigen gflags)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 	
 # Test of the weights of the final fit of the original MAGSAC, not built by default:
 #   cmake --build <build> --target test_sigma_consensus_weights && <build>/test_sigma_consensus_weights
 add_executable(test_sigma_consensus_weights EXCLUDE_FROM_ALL tests/cpp/test_sigma_consensus_weights.cpp)
-target_link_libraries(test_sigma_consensus_weights ${PROJECT_NAME} GraphCutRANSAC ${OpenCV_LIBS} Eigen3::Eigen gflags ${TRGT_LNK_LBS_ADDITIONAL})
+target_link_libraries(test_sigma_consensus_weights ${PROJECT_NAME} GraphCutRANSAC ${OpenCV_LIBS} Eigen3::Eigen gflags)
 set_target_properties(test_sigma_consensus_weights PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # ==============================================================================
@@ -184,6 +184,6 @@ endif (CREATE_SAMPLE_PROJECT)
 # Test of the inlier count of MAGSAC++'s refined model, not built by default:
 #   cmake --build <build> --target test_inlier_count && <build>/test_inlier_count
 add_executable(test_inlier_count EXCLUDE_FROM_ALL tests/cpp/test_inlier_count.cpp)
-target_link_libraries(test_inlier_count ${PROJECT_NAME} GraphCutRANSAC ${OpenCV_LIBS} Eigen3::Eigen gflags ${TRGT_LNK_LBS_ADDITIONAL})
+target_link_libraries(test_inlier_count ${PROJECT_NAME} GraphCutRANSAC ${OpenCV_LIBS} Eigen3::Eigen gflags)
 # In <build>, not in the directory of SampleProject
 set_target_properties(test_inlier_count PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
