@@ -617,7 +617,7 @@ bool MAGSAC<DatumType, ModelEstimator>::sigmaConsensus(
 
 	bool is_model_updated = false;
 	double best_score = 0,
-		best_marginalized_iteration_number;
+		best_marginalized_iteration_number = -1;
 	
 	for (auto &sigma_model : sigma_models)
 	{
@@ -646,7 +646,10 @@ bool MAGSAC<DatumType, ModelEstimator>::sigmaConsensus(
 		}
 	}
 
-	if (best_marginalized_iteration_number < 0 || std::isnan(best_marginalized_iteration_number))
+	// Check the range before converting to int (converting a larger value is undefined).
+	// Written as !(in range) so that NaN, for which every comparison is false, is caught too.
+	if (!(best_marginalized_iteration_number >= 0 &&
+		  best_marginalized_iteration_number < std::numeric_limits<int>::max()))
 		last_iteration_number = std::numeric_limits<int>::max();
 	else
 		last_iteration_number = static_cast<int>(round(best_marginalized_iteration_number));
@@ -936,8 +939,12 @@ bool MAGSAC<DatumType, ModelEstimator>::sigmaConsensusPlusPlus(
 			best_score_.score); // The score of the previous so-far-the-best model
 			
 		// Update the iteration number
-		last_iteration_number =
+		const double iteration_number =
 			log_confidence / log(1.0 - std::pow(static_cast<double>(score_.inlier_number) / point_number, sample_size));
+		// Check the range before converting to int, as in sigmaConsensus: the value can
+		// exceed INT_MAX, and is -inf when the model has no inlier.
+		last_iteration_number = iteration_number >= 0 && iteration_number < std::numeric_limits<int>::max() ?
+			static_cast<int>(iteration_number) : std::numeric_limits<int>::max();
 		return true;
 	}
 	return false;
