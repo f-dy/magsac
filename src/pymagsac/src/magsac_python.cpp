@@ -448,12 +448,36 @@ int findEssentialMatrix_(std::vector<double>& correspondences,
     {   
         std::vector<gcransac::Model> models = { model };
 		gcransac::estimator::solver::EssentialMatrixBundleAdjustmentSolver bundleOptimizer;
-		bundleOptimizer.estimateModel(
+		if (bundleOptimizer.estimateModel(
 			normalized_points,
 			&inlier_indices[0],
 			inlier_indices.size(),
 			models,
-			&weights[0]);
+			&weights[0]))
+        {
+            // Return the refined model, and its inliers. The bundle adjustment returns one model
+            // per pose of the essential matrix that passes its cheirality check: if it returns
+            // more than one, keep the one with the most inliers. It returns true only with
+            // at least one model.
+            num_inliers = -1;
+            std::vector<bool> candidate_inliers(points.rows);
+            for (const auto &refined_model : models)
+            {
+                int inlier_number = 0;
+                for (auto pt_idx = 0; pt_idx < points.rows; ++pt_idx)
+                {
+                    candidate_inliers[pt_idx] =
+                        estimator.residual(normalized_points.row(pt_idx), refined_model.descriptor) <= normalized_sigma_max;
+                    inlier_number += candidate_inliers[pt_idx];
+                }
+                if (inlier_number > num_inliers)
+                {
+                    num_inliers = inlier_number;
+                    model.descriptor = refined_model.descriptor;
+                    inliers.swap(candidate_inliers);
+                }
+            }
+        }
     }
 			
 
