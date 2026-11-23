@@ -491,7 +491,11 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("problemType"),
         py::arg("minimumInlierNumber") = 20);
 
-    m.def("findEssentialMatrix", &findEssentialMatrix, R"doc(some doc)doc",
+    m.def("findEssentialMatrix", &findEssentialMatrix, R"doc(Estimates an essential matrix with MAGSAC or MAGSAC++.
+Returns (E, inlier mask); E is None on failure.
+
+sigma_th: the inlier threshold, in pixels: the largest residual of an inlier
+(MAGSAC++'s score takes the noise scale sigma_max as sigma_th / 3.64).)doc",
         py::arg("correspondences"),
         py::arg("K1"),
         py::arg("K2"),
@@ -508,7 +512,11 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5);
 
-    m.def("findFundamentalMatrix", &findFundamentalMatrix, R"doc(some doc)doc",
+    m.def("findFundamentalMatrix", &findFundamentalMatrix, R"doc(Estimates a fundamental matrix with MAGSAC or MAGSAC++.
+Returns (F, inlier mask); F is None on failure.
+
+sigma_th: the inlier threshold, in pixels: the largest residual of an inlier
+(MAGSAC++'s score takes the noise scale sigma_max as sigma_th / 3.64).)doc",
         py::arg("correspondences"),
         py::arg("w1"),
         py::arg("h1"),
@@ -523,7 +531,14 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5);
 
-    m.def("findRigidTransformation", &findRigidTransformation, R"doc(some doc)doc",
+    m.def("findRigidTransformation", &findRigidTransformation, R"doc(Estimates a rigid transformation with MAGSAC or MAGSAC++.
+Returns (T, inlier mask); T is None on failure.
+
+sigma_th: the inlier threshold, in the data's units: the largest residual of an
+inlier (MAGSAC++'s score takes the noise scale sigma_max as sigma_th / 3.64).
+It is also the reference threshold: the threshold of the inliers counted to skip
+the models that can't beat the best one and, for MAGSAC++, to set the number of
+iterations, and of the check of the models.)doc",
         py::arg("correspondences"),
         py::arg("probabilities"),
 		py::arg("sampler") = 4,
@@ -534,7 +549,11 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5);
 
-  m.def("findHomography", &findHomography, R"doc(some doc)doc",
+  m.def("findHomography", &findHomography, R"doc(Estimates a homography with MAGSAC or MAGSAC++.
+Returns (H, inlier mask); H is None on failure.
+
+sigma_th: the inlier threshold, in pixels: the largest residual of an inlier
+(MAGSAC++'s score takes the noise scale sigma_max as sigma_th / 3.64).)doc",
         py::arg("correspondences"),
         py::arg("w1"),
         py::arg("h1"),
@@ -549,7 +568,11 @@ PYBIND11_PLUGIN(pymagsac) {
         py::arg("max_iters") = 1000,
         py::arg("partition_num") = 5); 
 
-  m.def("findLine2D", &findLine2D, R"doc(some doc)doc",
+  m.def("findLine2D", &findLine2D, R"doc(Estimates a 2D line with MAGSAC or MAGSAC++.
+Returns (line, inlier mask); line is None on failure.
+
+sigma_th: the inlier threshold, in pixels: the largest residual of an inlier
+(MAGSAC++'s score takes the noise scale sigma_max as sigma_th / 3.64).)doc",
         py::arg("points"),
         py::arg("w1"),
         py::arg("h1"),

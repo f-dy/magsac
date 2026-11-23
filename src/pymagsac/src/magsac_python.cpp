@@ -45,6 +45,10 @@ int findRigidTransformation_(
         magsac = new MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>(
             MAGSAC<cv::Mat, magsac::utils::DefaultRigidTransformationEstimator>::MAGSAC_ORIGINAL);
     magsac->setMaximumThreshold(sigma_max); // The maximum noise scale sigma allowed
+    // The reference threshold counts the inliers that set the number of iterations, and
+    // is the threshold of the validity check: the inlier threshold, since these data
+    // have no pixel unit (the default, 1, assumes pixels).
+    magsac->setReferenceThreshold(sigma_max);
     magsac->setCoreNumber(1); // The number of cores used to speed up sigma-consensus
     magsac->setPartitionNumber(partition_num); // The number partitions used for speeding up sigma consensus. As the value grows, the algorithm become slower and, usually, more accurate.
     magsac->setIterationLimit(max_iters);
